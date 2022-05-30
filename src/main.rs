@@ -1,4 +1,5 @@
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, HttpServer, cookie::Key};
+use actix_session::{SessionMiddleware, storage::CookieSessionStore};
 
 use config::{configure_app, configure_db};
 
@@ -14,8 +15,15 @@ async fn actix_run() -> std::io::Result<()> {
         Ok(p) => web::Data::new(p),
         Err(e) => panic!("{}", e),
     };
-
-    HttpServer::new(move || App::new().app_data(pool.clone()).configure(configure_app))
+    let secret_key = Key::generate();
+    HttpServer::new(move || App::new()
+        .wrap(
+            SessionMiddleware::new(
+                CookieSessionStore::default(),
+                secret_key.clone()
+            ))
+            .app_data(pool.clone())
+            .configure(configure_app))
         .bind(("127.0.0.1", 8000))?
         .run()
         .await
