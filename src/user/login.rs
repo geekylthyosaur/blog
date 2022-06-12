@@ -1,3 +1,4 @@
+use actix_session::Session;
 use actix_web::{
     web::{Data, Json},
     HttpResponse,
@@ -28,13 +29,20 @@ impl From<LoginForm> for Credentials {
 
 #[tracing::instrument(
     name = "Logging in",
-    skip(form, pool),
+    skip(form, pool, session),
     fields(
         email = %form.email,
     )
 )]
-pub async fn login(pool: Data<PgPool>, form: Json<LoginForm>) -> Result<HttpResponse, AuthError> {
+pub async fn login(
+    pool: Data<PgPool>,
+    form: Json<LoginForm>,
+    session: Session,
+) -> Result<HttpResponse, AuthError> {
     let credentials: Credentials = form.into_inner().into();
-    let _uuid = validate_credentials(&pool, credentials).await?;
+    let uuid = validate_credentials(&pool, credentials).await?;
+    session.insert("user_uuid", uuid).map_err(|e| {
+        AuthError::Unexpected(Box::new(e))
+    })?;
     Ok(HttpResponse::Ok().finish())
 }
