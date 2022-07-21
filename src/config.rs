@@ -2,7 +2,7 @@ use actix_web::web;
 use sqlx::PgPool;
 
 use crate::health_check::health_check;
-use crate::user::{login, signup};
+use crate::user::{login, logout, signup};
 
 pub fn configure_app(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -14,7 +14,8 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/users")
                     .service(web::resource("/signup").route(web::post().to(signup::signup)))
-                    .service(web::resource("/login").route(web::post().to(login::login))),
+                    .service(web::resource("/login").route(web::post().to(login::login)))
+                    .service(web::resource("/logout").route(web::post().to(logout::logout))),
             ),
     );
 }
