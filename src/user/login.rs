@@ -41,6 +41,7 @@ pub async fn login(
 ) -> Result<HttpResponse, AuthError> {
     let credentials: Credentials = form.into_inner().into();
     let uuid = validate_credentials(&pool, credentials).await?;
+    session.renew();
     session
         .insert("user_uuid", uuid)
         .map_err(|e| AuthError::Unexpected(Box::new(e)))?;
