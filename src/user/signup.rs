@@ -107,9 +107,7 @@ impl std::fmt::Debug for SignUpError {
 
 impl From<argon2::password_hash::Error> for SignUpError {
     fn from(e: argon2::password_hash::Error) -> Self {
-        match e {
-            _ => Self::Unexpected(Box::new(e)),
-        }
+        Self::Unexpected(Box::new(e))
     }
 }
 

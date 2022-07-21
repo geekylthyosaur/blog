@@ -39,9 +39,7 @@ impl ResponseError for AuthError {
 
 impl From<argon2::Error> for AuthError {
     fn from(e: argon2::Error) -> Self {
-        match e {
-            _ => AuthError::Unexpected(Box::new(e)),
-        }
+        AuthError::Unexpected(Box::new(e))
     }
 }
 
