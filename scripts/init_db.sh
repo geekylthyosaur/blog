@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-
+#!/bin/sh
 if [ ! -f ".env" ]; then
     echo >&2 "File .env not found"
     exit

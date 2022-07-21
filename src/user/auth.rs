@@ -72,7 +72,7 @@ pub async fn validate_credentials(
     pool: &PgPool,
     credentials: Credentials,
 ) -> Result<Uuid, AuthError> {
-    let row = sqlx::query!(
+    let rows = sqlx::query!(
         r#"
         SELECT owner_uuid, pwd_hash, salt
         FROM credentials
@@ -80,10 +80,12 @@ pub async fn validate_credentials(
     "#,
         credentials.email
     )
-    .fetch_one(pool)
+    .fetch_all(pool)
     .await?;
+    let row = rows.first().ok_or(AuthError::InvalidCredentials)?;
+
     let candidate = credentials.calc_pwd_hash(&row.salt)?;
-    let expected = Secret::new(row.pwd_hash);
+    let expected = Secret::new(row.pwd_hash.clone());
 
     verify_password_hash(expected, candidate)?;
 
